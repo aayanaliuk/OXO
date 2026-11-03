@@ -10,6 +10,28 @@ X_PLAYER = 1
 Y_PLAYER = -1
 
 
+def game():
+    turn = 0
+    currentPlayer = X_PLAYER
+
+    while True:
+        printGrid()
+        playerMove(currentPlayer)
+        turn += 1
+
+        if endGameCheck(currentPlayer) == currentPlayer:
+            break
+        elif turn >= 9:
+            # If the current player hasnt won and there have been 9 turns then its a draw
+            currentPlayer = DRAW
+            break
+        else:
+            # Each player is the negative of the other.
+            currentPlayer *= -1
+
+    printGrid()
+    winScreen(currentPlayer)
+
 def printGrid():
     for row in range(3):
         print(f" {getGridValue(row, 0)} │ {getGridValue(row, 1)} │ {getGridValue(row, 2)} ")
@@ -17,6 +39,11 @@ def printGrid():
         if row < 2:
             print("───┼───┼───")
 
+def getPlayer(player):
+    if player == X_PLAYER:
+        return "X"
+    else:
+        return "O"
 
 def getGridValue(row, column):
     gridVal = grid[row][column]
@@ -31,24 +58,42 @@ def getGridValue(row, column):
         return "O"
 
 
-def game():
-    turn = 0
-    currentPlayer = X_PLAYER
+def playerMove(player):
+    strPlayer = getPlayer(player)
+    (row, column) = getPlayerMove(strPlayer)
+    grid[row][column] = player
 
+def getPlayerMove(strPlayer: str):
     while True:
-        playerMove(currentPlayer)
-        turn += 1
+        strInput = input(
+            "Where would player " + strPlayer +
+            " like to go? Please type in the number of a valid square: "
+        )
 
-        if endGameCheck(currentPlayer) == currentPlayer:
-            break
-        elif turn >= 9:
-            currentPlayer = DRAW
-            break
-        else:
-            currentPlayer *= -1
+        try:
+            intInput: int = int(strInput)
 
-    printGrid()
-    winScreen(currentPlayer)
+            if intInput < 1:
+                print("Too Low, please pick a valid number")
+
+            elif intInput > 9:
+                print("Too high, please pick a valid number")
+
+            else:
+                row = (intInput - 1) // 3
+                column = (intInput - 1) % 3
+
+                if grid[row][column] == EMPTY:
+                    return (row, column)
+                else:
+                    print(
+                        "That location already has a " +
+                        getGridValue(row, column) +
+                        " in it. Please pick a different square"
+                    )
+
+        except ValueError:
+            print("Please type an integer between 1 and 9 inclusive.")
 
 
 def winScreen(winner):
@@ -57,15 +102,8 @@ def winScreen(winner):
     else:
         print("Player " + getPlayer(winner) + " wins!")
 
-
-def playerMove(player):
-    printGrid()
-    strPlayer = getPlayer(player)
-    (row, column) = getPlayerMove(strPlayer)
-    grid[row][column] = player
-
-
 def endGameCheck(player):
+    # Could be more optimes by running the check after every function but makes the code look messier
     horizontal = endGameCheckHorizontal(player, grid)
     vertical = endGameCheckVertical(player, grid)
     diagonal = endGameCheckDiagonal(player)
@@ -103,44 +141,6 @@ def endGameCheckDiagonal(player):
     return player if winConditionOne or winConditionTwo else DRAW
 
 
-def getPlayerMove(strPlayer: str):
-    while True:
-        strInput = input(
-            "Where would player " + strPlayer +
-            " like to go? Please type in the number of a valid square: "
-        )
-
-        try:
-            intInput: int = int(strInput)
-
-            if intInput < 1:
-                print("Too Low, please pick a valid number")
-
-            elif intInput > 9:
-                print("Too high, please pick a valid number")
-
-            else:
-                row = (intInput - 1) // 3
-                column = (intInput - 1) % 3
-
-                if grid[row][column] == EMPTY:
-                    return (row, column)
-                else:
-                    print(
-                        "That location already has a " +
-                        getGridValue(row, column) +
-                        " in it. Please pick a different square"
-                    )
-
-        except ValueError:
-            print("Please type an integer between 1 and 9 inclusive.")
-
-
-def getPlayer(player):
-    if player == X_PLAYER:
-        return "X"
-    else:
-        return "O"
-
+    
 
 game()
